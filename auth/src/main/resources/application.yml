@@ -3,6 +3,18 @@ jwt:
   lifetime: 20160m
 
 spring:
+  mail:
+    host: ${email.host}
+    port: ${email.port}
+    username: ${email.from}
+    password: ${email.password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
   application:
     name: authSecureXPay
 
@@ -19,3 +31,9 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: update
+
+email:
+  from: "securexpayhelp@mail.ru"
+  password: "kg1WNwuTucR8SMQbfrCp"
+  host: "smtp.mail.ru"
+  port: 587

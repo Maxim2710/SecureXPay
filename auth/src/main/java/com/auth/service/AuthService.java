@@ -62,4 +62,5 @@ public class AuthService {
 
         return new AccountResponseLogin("Авторизация успешна", token, userBom);
     }
+
 }
