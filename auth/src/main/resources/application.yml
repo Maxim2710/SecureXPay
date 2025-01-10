@@ -1,0 +1,21 @@
+jwt:
+  secret: VGhpcyBpcyBhIHNlY3JldCBrZXk=
+  lifetime: 20160m
+
+spring:
+  application:
+    name: authSecureXPay
+
+  security:
+    user:
+      password: 181056ad-19df-4265-8169-7e851246fd59
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: 12345
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
