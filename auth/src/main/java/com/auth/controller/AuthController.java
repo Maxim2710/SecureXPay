@@ -1,11 +1,9 @@
 package com.auth.controller;
 
 import com.auth.bom.error.ErrorResponse;
-import com.auth.dto.AccountLoginForm;
-import com.auth.dto.AccountRegistrationForm;
-import com.auth.dto.AccountResponseLogin;
-import com.auth.dto.AccountResponseRegister;
+import com.auth.dto.*;
 import com.auth.service.AuthService;
+import com.auth.service.PasswordResetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +14,10 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private PasswordResetService passwordResetService;
+
 
     @PostMapping(path = "/register")
     public ResponseEntity<Object> registerUser(@RequestBody AccountRegistrationForm accountRegistrationForm) {
@@ -36,6 +38,31 @@ public class AuthController {
         } catch (RuntimeException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new ErrorResponse(ex.getMessage()));
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Object> sendResetPasswordLink(@RequestBody PasswordResetRequest passwordResetRequest) {
+        try {
+            passwordResetService.sendResetPasswordLink(passwordResetRequest.getEmail());  // используем email из DTO
+            return ResponseEntity.ok("Ссылка для сброса пароля отправлена на email");
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ex.getMessage());
+        }
+    }
+
+    @PostMapping("/reset-password-confirm")
+    public ResponseEntity<Object> resetPassword(@RequestParam("token") String token,
+                                                @RequestBody NewPasswordRequest newPasswordRequest) {
+        System.out.println(token);
+        System.out.println(newPasswordRequest.getNewPassword());
+        try {
+            passwordResetService.resetPassword(token, newPasswordRequest.getNewPassword());
+            return ResponseEntity.ok("Пароль успешно изменен");
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ex.getMessage());
         }
     }
 }
