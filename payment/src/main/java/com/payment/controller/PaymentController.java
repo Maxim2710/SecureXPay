@@ -1,5 +1,7 @@
 package com.payment.controller;
 
+import com.payment.bom.error.ErrorResponse;
+import com.payment.dto.PaymentDTO;
 import com.payment.dto.PaymentRequest;
 import com.payment.dto.PaymentResponse;
 import com.payment.model.payment.Payment;
@@ -16,13 +18,13 @@ public class PaymentController {
     private PaymentService paymentService;
 
     @PostMapping("/create")
-    public ResponseEntity<?> createPayment(@RequestHeader(name = "Authorization") String token,
+    public ResponseEntity<Object> createPayment(@RequestHeader(name = "Authorization") String token,
                                            @RequestBody PaymentRequest paymentRequest) {
         try {
-            Payment payment = paymentService.createPayment(token, paymentRequest.getAmount());
+            PaymentDTO payment = paymentService.createPayment(token, paymentRequest.getAmount());
             return ResponseEntity.ok(new PaymentResponse(payment.getId(), payment.getStatus()));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception ex) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(ex.getMessage()));
         }
     }
 }

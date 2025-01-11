@@ -1,6 +1,8 @@
 package com.payment.service;
 
 import com.payment.connector.AuthConnector;
+import com.payment.dto.PaymentDTO;
+import com.payment.dto.PaymentResponse;
 import com.payment.model.payment.Payment;
 import com.payment.model.status.PaymentStatus;
 import com.payment.model.user.User;
@@ -23,7 +25,7 @@ public class PaymentService {
     @Autowired
     private AuthConnector authConnector;
 
-    public Payment createPayment(String token, BigDecimal amount) {
+    public PaymentDTO createPayment(String token, BigDecimal amount) {
         User user = authConnector.getCurrentUser(token);
 
         String otp = generateOtp();
@@ -38,8 +40,10 @@ public class PaymentService {
 
         emailService.sendOtpEmail(user.getEmail(), otp, amount);
 
-        return payment;
+        return new PaymentDTO(payment.getId(), payment.getStatus());
     }
+
+    public PaymentResponse
 
     private String generateOtp() {
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
