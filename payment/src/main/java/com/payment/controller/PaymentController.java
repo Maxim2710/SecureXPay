@@ -30,9 +30,7 @@ public class PaymentController {
     @PostMapping(path = "/confirm")
     public ResponseEntity<?> confirmPayment(@RequestBody PaymentConfirmationRequest request) {
         try {
-            System.out.println(1);
             PaymentConfirmationResponse response = paymentService.confirmPayment(request.getId(), request.getOtp());
-            System.out.println(1);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
