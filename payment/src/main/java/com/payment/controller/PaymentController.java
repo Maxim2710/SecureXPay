@@ -53,4 +53,18 @@ public class PaymentController {
                     .body(new ErrorResponse("Произошла непредвиденная ошибка"));
         }
     }
+
+    @PostMapping("/refund")
+    public ResponseEntity<Object> refundPayment(@RequestHeader(name = "Authorization") String token,
+                                                @RequestParam Long paymentId) {
+        try {
+            paymentService.refundPayment(token, paymentId);
+            return ResponseEntity.ok(new PaymentRefundResponse(paymentId, PaymentStatus.REFUNDED, "Платеж успешно возвращен"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponse("Произошла непредвиденная ошибка"));
+        }
+    }
 }
