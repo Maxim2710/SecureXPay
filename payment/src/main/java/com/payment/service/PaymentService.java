@@ -63,6 +63,18 @@ public class PaymentService {
             throw new IllegalArgumentException("Платеж уже подтвержден");
         }
 
+        if (payment.getStatus() == PaymentStatus.CANCELED) {
+            throw new IllegalArgumentException("Платеж уже отменен и не может быть подтвержден");
+        }
+
+        if (payment.getStatus() == PaymentStatus.REFUNDED) {
+            throw new IllegalArgumentException("Платеж уже был возвращен и не может быть подтвержден");
+        }
+
+        if (payment.getStatus() != PaymentStatus.PENDING) {
+            throw new IllegalArgumentException("Платеж можно подтвердить только в статусе PENDING");
+        }
+
         if (!payment.getOtp().equals(otp)) {
             payment.setStatus(PaymentStatus.FAILED);
             paymentRepository.save(payment);
@@ -79,6 +91,7 @@ public class PaymentService {
 
         return new PaymentConfirmationResponse(payment.getId(), payment.getStatus(), "Платеж успешно подтвержден");
     }
+
 
     private String generateOtp() {
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
