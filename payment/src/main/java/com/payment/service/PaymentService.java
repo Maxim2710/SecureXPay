@@ -53,18 +53,31 @@ public class PaymentService {
         }
 
         Payment payment = optionalPayment.get();
+        String userEmail = payment.getUser().getEmail();
+
+        if (payment.getStatus() == PaymentStatus.FAILED) {
+            throw new IllegalArgumentException("Платеж уже отклонен");
+        }
+
+        if (payment.getStatus() == PaymentStatus.CONFIRMED) {
+            throw new IllegalArgumentException("Платеж уже подтвержден");
+        }
 
         if (!payment.getOtp().equals(otp)) {
+            payment.setStatus(PaymentStatus.FAILED);
+            paymentRepository.save(payment);
+
+            emailService.sendPaymentFailedEmail(payment.getId(), userEmail, payment.getAmount());
+
             throw new IllegalArgumentException("Неверный одноразовый код");
         }
 
         payment.setStatus(PaymentStatus.CONFIRMED);
         paymentRepository.save(payment);
 
-        emailService.sendPaymentConfirmationEmail(payment.getId(), payment.getUser().getEmail(), payment.getAmount());
+        emailService.sendPaymentConfirmationEmail(payment.getId(), userEmail, payment.getAmount());
 
         return new PaymentConfirmationResponse(payment.getId(), payment.getStatus(), "Платеж успешно подтвержден");
-
     }
 
     private String generateOtp() {
