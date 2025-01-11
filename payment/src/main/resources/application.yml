@@ -1,0 +1,43 @@
+spring:
+  security:
+    user:
+      password: 7757dc59-de4c-47ad-9ec2-d5cf6296e222
+
+  application:
+    name: paymentSecureXPay
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: 12345
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+
+  mail:
+    host: ${email.host}
+    port: ${email.port}
+    username: ${email.from}
+    password: ${email.password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+email:
+  from: "securexpayhelp@mail.ru"
+  password: "kg1WNwuTucR8SMQbfrCp"
+  host: "smtp.mail.ru"
+  port: 587
+
+connector:
+  auth:
+    url: http://localhost:8080/auth
+
+server:
+  port: 8081
+
