@@ -12,16 +12,14 @@ import org.springframework.security.web.context.SecurityContextPersistenceFilter
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/register").permitAll()
-                        .requestMatchers("/auth/login").permitAll()
-                        .requestMatchers("/auth/reset-password").permitAll()
-                        .requestMatchers("/auth/reset-password-confirm").permitAll()
+                        .requestMatchers("/auth/register", "/auth/login", "/auth/reset-password", "/auth/reset-password-confirm").permitAll()
                         .anyRequest().authenticated()
-                );
+                )
+                .addFilterBefore(jwtFilter, SecurityContextPersistenceFilter.class); // Добавление JWT фильтра
 
         return http.build();
     }
