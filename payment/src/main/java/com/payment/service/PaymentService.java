@@ -1,6 +1,7 @@
 package com.payment.service;
 
 import com.payment.connector.AuthConnector;
+import com.payment.dto.PaymentConfirmationResponse;
 import com.payment.dto.PaymentDTO;
 import com.payment.dto.PaymentResponse;
 import com.payment.model.payment.Payment;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.security.SecureRandom;
+import java.util.Optional;
 
 @Service
 public class PaymentService {
@@ -43,7 +45,27 @@ public class PaymentService {
         return new PaymentDTO(payment.getId(), payment.getStatus());
     }
 
-    public PaymentResponse
+    public PaymentConfirmationResponse confirmPayment(Long paymentId, String otp) {
+        Optional<Payment> optionalPayment = paymentRepository.findById(paymentId);
+
+        if (optionalPayment.isEmpty()) {
+            throw new IllegalArgumentException("Платеж не найден");
+        }
+
+        Payment payment = optionalPayment.get();
+
+        if (!payment.getOtp().equals(otp)) {
+            throw new IllegalArgumentException("Неверный одноразовый код");
+        }
+
+        payment.setStatus(PaymentStatus.CONFIRMED);
+        paymentRepository.save(payment);
+
+        emailService.sendPaymentConfirmationEmail(payment.getUser().getEmail(), payment.getAmount());
+
+        return new PaymentConfirmationResponse(payment.getId(), payment.getStatus(), "Платеж успешно подтвержден");
+
+    }
 
     private String generateOtp() {
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
