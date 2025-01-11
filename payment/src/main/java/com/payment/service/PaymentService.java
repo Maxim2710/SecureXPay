@@ -3,13 +3,13 @@ package com.payment.service;
 import com.payment.connector.AuthConnector;
 import com.payment.dto.PaymentConfirmationResponse;
 import com.payment.dto.PaymentDTO;
-import com.payment.dto.PaymentResponse;
 import com.payment.model.payment.Payment;
 import com.payment.model.status.PaymentStatus;
 import com.payment.model.user.User;
 import com.payment.repository.PaymentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.security.SecureRandom;
@@ -92,6 +92,47 @@ public class PaymentService {
         return new PaymentConfirmationResponse(payment.getId(), payment.getStatus(), "Платеж успешно подтвержден");
     }
 
+    @Transactional
+    public void cancelPayment(String token, Long paymentId) {
+        User user = authConnector.getCurrentUser(token);
+
+        Optional<Payment> optionalPayment = paymentRepository.findById(paymentId);
+
+        if (optionalPayment.isEmpty()) {
+            throw new IllegalArgumentException("Платеж не найден");
+        }
+
+        Payment payment = optionalPayment.get();
+
+        if (!payment.getUser().getId().equals(user.getId())) {
+            throw new IllegalArgumentException("Вы не можете отменить платеж другого пользователя");
+        }
+
+        if (payment.getStatus() == PaymentStatus.CANCELED) {
+            throw new IllegalArgumentException("Платеж уже отменен");
+        }
+
+        if (payment.getStatus() == PaymentStatus.FAILED) {
+            throw new IllegalArgumentException("Платеж был отклонен и не может быть отменен");
+        }
+
+        if (payment.getStatus() == PaymentStatus.CONFIRMED) {
+            throw new IllegalArgumentException("Платеж уже подтвержден и не может быть отменен");
+        }
+
+        if (payment.getStatus() == PaymentStatus.REFUNDED) {
+            throw new IllegalArgumentException("Платеж уже был возвращен и не может быть отменен");
+        }
+
+        if (payment.getStatus() != PaymentStatus.PENDING) {
+            throw new IllegalArgumentException("Платеж можно отменить только в статусе PENDING");
+        }
+
+        payment.setStatus(PaymentStatus.CANCELED);
+        paymentRepository.save(payment);
+
+        emailService.sendPaymentCancelledEmail(payment.getId(), payment.getUser().getEmail(), payment.getAmount());
+    }
 
     private String generateOtp() {
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
