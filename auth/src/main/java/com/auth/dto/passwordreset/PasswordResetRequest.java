@@ -1,4 +1,4 @@
-package com.auth.dto;
+package com.auth.dto.passwordreset;
 
 import lombok.Data;
 

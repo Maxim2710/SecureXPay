@@ -2,10 +2,10 @@ package com.auth.service;
 
 import com.auth.bom.UserBom;
 import com.auth.converter.UserConverter;
-import com.auth.dto.AccountLoginForm;
-import com.auth.dto.AccountRegistrationForm;
-import com.auth.dto.AccountResponseLogin;
-import com.auth.dto.AccountResponseRegister;
+import com.auth.dto.login.AccountLoginForm;
+import com.auth.dto.registration.AccountRegistrationForm;
+import com.auth.dto.login.AccountResponseLogin;
+import com.auth.dto.registration.AccountResponseRegister;
 import com.auth.model.role.Role;
 import com.auth.model.user.User;
 import com.auth.repository.UserRepository;

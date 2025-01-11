@@ -37,3 +37,6 @@ email:
   password: "kg1WNwuTucR8SMQbfrCp"
   host: "smtp.mail.ru"
   port: 587
+
+server:
+  port: 8080

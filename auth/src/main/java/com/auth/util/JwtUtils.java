@@ -75,4 +75,18 @@ public class JwtUtils {
 
         return new Date(System.currentTimeMillis() + durationMillis);
     }
+
+    public boolean validateToken(String token) {
+        try {
+            Jws<Claims> claims = Jwts.parser()
+                    .setSigningKey(hmacKey)
+                    .parseClaimsJws(token);
+
+            return !claims.getBody().getExpiration().before(new Date());
+        } catch (Exception e) {
+            System.err.println("JWT validation failed: " + e.getMessage());
+            return false;
+        }
+    }
+
 }
