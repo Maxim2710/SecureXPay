@@ -57,5 +57,26 @@ public class EmailService {
 
         sendEmail(email, subject, content);
     }
+
+    public void sendPaymentConfirmationEmail(String email, BigDecimal amount) {
+        String subject = "Платеж успешно выполнен";
+
+        String content = "<html>" +
+                "<body style='font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px;'>" +
+                "<div style='max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);'>" +
+                "<h2 style='color: #4CAF50;'>Ваш платеж подтвержден</h2>" +
+                "<p style='color: #333; font-size: 16px;'>Ваш платеж на сумму <strong>" + amount.setScale(2, RoundingMode.HALF_UP) + " руб.</strong> успешно завершен.</p>" +
+                "<p style='color: #333; font-size: 16px;'>Спасибо за использование SecureXPay!</p>" +
+                "<p style='color: #333; font-size: 16px;'>С уважением,</p>" +
+                "<p style='color: #333; font-size: 16px;'>Команда SecureXPay</p>" +
+                "<hr style='border: 1px solid #e0e0e0;'/>" +
+                "<footer style='color: #999; font-size: 14px;'>Это автоматическое письмо. Пожалуйста, не отвечайте на него.</footer>" +
+                "</div>" +
+                "</body>" +
+                "</html>";
+
+        sendEmail(email, subject, content);
+    }
+
 }
 
