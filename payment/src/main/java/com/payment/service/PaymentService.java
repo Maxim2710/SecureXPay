@@ -46,13 +46,17 @@ public class PaymentService {
     }
 
     public PaymentConfirmationResponse confirmPayment(Long paymentId, String otp) {
-        Optional<Payment> optionalPayment = paymentRepository.findById(paymentId);
+        Optional<Payment> optionalPayment = paymentRepository.findByIdWithUser(paymentId);
 
         if (optionalPayment.isEmpty()) {
             throw new IllegalArgumentException("Платеж не найден");
         }
 
         Payment payment = optionalPayment.get();
+
+        System.out.println(payment.getOtp());
+        System.out.println(payment.getOtp().equals(otp));
+        System.out.println(payment.getUser().getEmail());
 
         if (!payment.getOtp().equals(otp)) {
             throw new IllegalArgumentException("Неверный одноразовый код");
