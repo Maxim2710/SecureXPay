@@ -1,6 +1,9 @@
 package com.payment.service;
 
 import com.payment.connector.AuthConnector;
+import com.payment.dto.PaymentConfirmationResponse;
+import com.payment.dto.PaymentDTO;
+import com.payment.dto.PaymentResponse;
 import com.payment.model.payment.Payment;
 import com.payment.model.status.PaymentStatus;
 import com.payment.model.user.User;
@@ -10,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.security.SecureRandom;
+import java.util.Optional;
 
 @Service
 public class PaymentService {
@@ -23,7 +27,7 @@ public class PaymentService {
     @Autowired
     private AuthConnector authConnector;
 
-    public Payment createPayment(String token, BigDecimal amount) {
+    public PaymentDTO createPayment(String token, BigDecimal amount) {
         User user = authConnector.getCurrentUser(token);
 
         String otp = generateOtp();
@@ -36,9 +40,31 @@ public class PaymentService {
 
         payment = paymentRepository.save(payment);
 
-        emailService.sendOtpEmail(user.getEmail(), otp, amount);
+        emailService.sendOtpEmail(payment.getId(), user.getEmail(), otp, amount);
 
-        return payment;
+        return new PaymentDTO(payment.getId(), payment.getStatus());
+    }
+
+    public PaymentConfirmationResponse confirmPayment(Long paymentId, String otp) {
+        Optional<Payment> optionalPayment = paymentRepository.findByIdWithUser(paymentId);
+
+        if (optionalPayment.isEmpty()) {
+            throw new IllegalArgumentException("Платеж не найден");
+        }
+
+        Payment payment = optionalPayment.get();
+
+        if (!payment.getOtp().equals(otp)) {
+            throw new IllegalArgumentException("Неверный одноразовый код");
+        }
+
+        payment.setStatus(PaymentStatus.CONFIRMED);
+        paymentRepository.save(payment);
+
+        emailService.sendPaymentConfirmationEmail(payment.getId(), payment.getUser().getEmail(), payment.getAmount());
+
+        return new PaymentConfirmationResponse(payment.getId(), payment.getStatus(), "Платеж успешно подтвержден");
+
     }
 
     private String generateOtp() {
