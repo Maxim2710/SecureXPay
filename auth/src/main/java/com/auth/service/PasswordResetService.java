@@ -4,8 +4,10 @@ import com.auth.model.user.User;
 import com.auth.repository.UserRepository;
 import com.auth.util.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.parameters.P;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PasswordResetService {
@@ -62,6 +64,26 @@ public class PasswordResetService {
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+
+        user.setHashedPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void updatePassword(String token, String currentPassword, String newPassword) {
+        String email;
+        try {
+            email = jwtUtils.parseJwt(token);
+        } catch (Exception ex) {
+            throw new RuntimeException("Неверный или истекший токен");
+        }
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+
+        if (passwordEncoder.matches(currentPassword, user.getHashedPassword())) {
+            throw new RuntimeException("Текущий пароль неверен");
+        }
 
         user.setHashedPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);

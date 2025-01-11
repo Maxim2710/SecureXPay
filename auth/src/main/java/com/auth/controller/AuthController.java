@@ -1,7 +1,13 @@
 package com.auth.controller;
 
 import com.auth.bom.error.ErrorResponse;
-import com.auth.dto.*;
+import com.auth.dto.login.AccountLoginForm;
+import com.auth.dto.login.AccountResponseLogin;
+import com.auth.dto.passwordreset.NewPasswordRequest;
+import com.auth.dto.passwordreset.PasswordResetRequest;
+import com.auth.dto.passwordupdate.UpdatePasswordRequest;
+import com.auth.dto.registration.AccountRegistrationForm;
+import com.auth.dto.registration.AccountResponseRegister;
 import com.auth.service.AuthService;
 import com.auth.service.PasswordResetService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,14 +61,29 @@ public class AuthController {
     @PostMapping("/reset-password-confirm")
     public ResponseEntity<Object> resetPassword(@RequestParam("token") String token,
                                                 @RequestBody NewPasswordRequest newPasswordRequest) {
-        System.out.println(token);
-        System.out.println(newPasswordRequest.getNewPassword());
         try {
             passwordResetService.resetPassword(token, newPasswordRequest.getNewPassword());
             return ResponseEntity.ok("Пароль успешно изменен");
         } catch (RuntimeException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ex.getMessage());
+        }
+    }
+
+    @PutMapping(path = "/update-password")
+    public ResponseEntity<Object> updatePassword(
+            @RequestHeader("Authorization") String token,
+            @RequestBody UpdatePasswordRequest updatePasswordRequest) {
+
+        System.out.println(token);
+        try {
+            String jwtToken = token.startsWith("Bearer ") ? token.substring(7) : token;
+
+            passwordResetService.updatePassword(jwtToken, updatePasswordRequest.getCurrentPassword(), updatePasswordRequest.getNewPassword());
+            return ResponseEntity.ok("Пароль успешно обновлен");
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponse(ex.getMessage()));
         }
     }
 }
