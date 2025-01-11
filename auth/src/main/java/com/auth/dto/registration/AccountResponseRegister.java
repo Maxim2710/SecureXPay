@@ -1,4 +1,4 @@
-package com.auth.dto;
+package com.auth.dto.registration;
 
 import com.auth.bom.UserBom;
 import lombok.AllArgsConstructor;
