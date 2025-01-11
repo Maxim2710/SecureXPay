@@ -55,20 +55,8 @@ public class PaymentService {
         Payment payment = optionalPayment.get();
         String userEmail = payment.getUser().getEmail();
 
-        if (payment.getStatus() == PaymentStatus.FAILED) {
-            throw new IllegalArgumentException("Платеж уже отклонен");
-        }
-
         if (payment.getStatus() == PaymentStatus.CONFIRMED) {
             throw new IllegalArgumentException("Платеж уже подтвержден");
-        }
-
-        if (payment.getStatus() == PaymentStatus.CANCELED) {
-            throw new IllegalArgumentException("Платеж уже отменен и не может быть подтвержден");
-        }
-
-        if (payment.getStatus() == PaymentStatus.REFUNDED) {
-            throw new IllegalArgumentException("Платеж уже был возвращен и не может быть подтвержден");
         }
 
         if (payment.getStatus() != PaymentStatus.PENDING) {
@@ -112,18 +100,6 @@ public class PaymentService {
             throw new IllegalArgumentException("Платеж уже отменен");
         }
 
-        if (payment.getStatus() == PaymentStatus.FAILED) {
-            throw new IllegalArgumentException("Платеж был отклонен и не может быть отменен");
-        }
-
-        if (payment.getStatus() == PaymentStatus.CONFIRMED) {
-            throw new IllegalArgumentException("Платеж уже подтвержден и не может быть отменен");
-        }
-
-        if (payment.getStatus() == PaymentStatus.REFUNDED) {
-            throw new IllegalArgumentException("Платеж уже был возвращен и не может быть отменен");
-        }
-
         if (payment.getStatus() != PaymentStatus.PENDING) {
             throw new IllegalArgumentException("Платеж можно отменить только в статусе PENDING");
         }
@@ -132,6 +108,36 @@ public class PaymentService {
         paymentRepository.save(payment);
 
         emailService.sendPaymentCancelledEmail(payment.getId(), payment.getUser().getEmail(), payment.getAmount());
+    }
+
+    @Transactional
+    public void refundPayment(String token, Long paymentId) {
+        User user = authConnector.getCurrentUser(token);
+
+        Optional<Payment> optionalPayment = paymentRepository.findById(paymentId);
+
+        if (optionalPayment.isEmpty()) {
+            throw new IllegalArgumentException("Платеж не найден");
+        }
+
+        Payment payment = optionalPayment.get();
+
+        if (!payment.getUser().getId().equals(user.getId())) {
+            throw new IllegalArgumentException("Вы не можете вернуть платеж другого пользователя");
+        }
+
+        if (payment.getStatus() == PaymentStatus.REFUNDED) {
+            throw new IllegalArgumentException("Платеж уже возвращен");
+        }
+
+        if (payment.getStatus() != PaymentStatus.CONFIRMED) {
+            throw new IllegalArgumentException("Платеж можно вернуть только в статусе CONFIRMED");
+        }
+
+        payment.setStatus(PaymentStatus.REFUNDED);
+        paymentRepository.save(payment);
+
+        emailService.sendPaymentRefundedEmail(payment.getId(), payment.getUser().getEmail(), payment.getAmount());
     }
 
     private String generateOtp() {
