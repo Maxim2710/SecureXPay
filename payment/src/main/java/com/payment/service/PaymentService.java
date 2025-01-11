@@ -40,7 +40,7 @@ public class PaymentService {
 
         payment = paymentRepository.save(payment);
 
-        emailService.sendOtpEmail(user.getEmail(), otp, amount);
+        emailService.sendOtpEmail(payment.getId(), user.getEmail(), otp, amount);
 
         return new PaymentDTO(payment.getId(), payment.getStatus());
     }
@@ -54,10 +54,6 @@ public class PaymentService {
 
         Payment payment = optionalPayment.get();
 
-        System.out.println(payment.getOtp());
-        System.out.println(payment.getOtp().equals(otp));
-        System.out.println(payment.getUser().getEmail());
-
         if (!payment.getOtp().equals(otp)) {
             throw new IllegalArgumentException("Неверный одноразовый код");
         }
@@ -65,7 +61,7 @@ public class PaymentService {
         payment.setStatus(PaymentStatus.CONFIRMED);
         paymentRepository.save(payment);
 
-        emailService.sendPaymentConfirmationEmail(payment.getUser().getEmail(), payment.getAmount());
+        emailService.sendPaymentConfirmationEmail(payment.getId(), payment.getUser().getEmail(), payment.getAmount());
 
         return new PaymentConfirmationResponse(payment.getId(), payment.getStatus(), "Платеж успешно подтвержден");
 
