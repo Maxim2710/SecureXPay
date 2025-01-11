@@ -101,6 +101,25 @@ public class EmailService {
         sendEmail(email, subject, content);
     }
 
+    public void sendPaymentCancelledEmail(Long paymentId, String email, BigDecimal amount) {
+        String subject = "Платеж отменен";
+
+        String content = "<html>" +
+                "<body style='font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px;'>" +
+                "<div style='max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);'>" +
+                "<h2 style='color: #FF5733;'>Ваш платеж отменен</h2>" +
+                "<p style='color: #333; font-size: 16px;'>Ваш платеж с уникальным идентификатором <strong>" + paymentId + "</strong> на сумму <strong>" + amount.setScale(2, RoundingMode.HALF_UP) + " руб.</strong> был отменен.</p>" +
+                "<p style='color: #333; font-size: 16px;'>Если это было сделано ошибочно, пожалуйста, свяжитесь с нами.</p>" +
+                "<p style='color: #333; font-size: 16px;'>С уважением,</p>" +
+                "<p style='color: #333; font-size: 16px;'>Команда SecureXPay</p>" +
+                "<hr style='border: 1px solid #e0e0e0;'/>" +
+                "<footer style='color: #999; font-size: 14px;'>Это автоматическое письмо. Пожалуйста, не отвечайте на него.</footer>" +
+                "</div>" +
+                "</body>" +
+                "</html>";
+
+        sendEmail(email, subject, content);
+    }
 }
 
 

@@ -2,7 +2,7 @@ package com.payment.controller;
 
 import com.payment.bom.error.ErrorResponse;
 import com.payment.dto.*;
-import com.payment.model.payment.Payment;
+import com.payment.model.status.PaymentStatus;
 import com.payment.service.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -32,6 +32,20 @@ public class PaymentController {
         try {
             PaymentConfirmationResponse response = paymentService.confirmPayment(request.getId(), request.getOtp());
             return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponse("Произошла непредвиденная ошибка"));
+        }
+    }
+
+    @PostMapping(path = "/cancel")
+    public ResponseEntity<Object> cancelPayment(@RequestHeader(name = "Authorization") String token,
+                                                @RequestParam Long paymentId) {
+        try {
+            paymentService.cancelPayment(token, paymentId);
+            return ResponseEntity.ok(new PaymentCanceledResponse(paymentId, PaymentStatus.CANCELED, "Платеж успешно отменен"));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         } catch (Exception e) {
