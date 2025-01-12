@@ -3,6 +3,7 @@ package com.payment.service;
 import com.payment.connector.AuthConnector;
 import com.payment.dto.PaymentConfirmationResponse;
 import com.payment.dto.PaymentDTO;
+import com.payment.dto.PaymentHistoryDTO;
 import com.payment.model.payment.Payment;
 import com.payment.model.status.PaymentStatus;
 import com.payment.model.user.User;
@@ -13,7 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.security.SecureRandom;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class PaymentService {
@@ -138,6 +141,23 @@ public class PaymentService {
         paymentRepository.save(payment);
 
         emailService.sendPaymentRefundedEmail(payment.getId(), payment.getUser().getEmail(), payment.getAmount());
+    }
+
+    @Transactional
+    public List<PaymentHistoryDTO> getPaymentHistory(String token) {
+        User user = authConnector.getCurrentUser(token);
+
+        List<Payment> payments = paymentRepository.findByUserId(user.getId());
+
+        return payments.stream()
+                .map(payment -> new PaymentHistoryDTO(
+                        payment.getId(),
+                        payment.getAmount(),
+                        payment.getStatus(),
+                        payment.getCreatedAt(),
+                        payment.getUpdatedAt()
+                ))
+                .collect(Collectors.toList());
     }
 
     private String generateOtp() {
