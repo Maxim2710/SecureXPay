@@ -1,6 +1,6 @@
 FROM amazoncorretto:21-alpine
 
-EXPOSE 8080
+EXPOSE 8081
 
 WORKDIR /securexpay/payment
 
