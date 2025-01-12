@@ -19,4 +19,6 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     List<Payment> findByUserId(Long userId);
 
     List<Payment> findAllByStatusInAndUpdatedAtBefore(List<PaymentStatus> statuses, LocalDateTime updatedAt);
+
+    List<Payment> findAllByStatusAndUpdatedAtBefore(PaymentStatus status, LocalDateTime updatedAt);
 }

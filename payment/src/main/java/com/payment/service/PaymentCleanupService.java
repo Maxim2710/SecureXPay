@@ -29,4 +29,18 @@ public class PaymentCleanupService {
             paymentRepository.deleteAll(oldPayments);
         }
     }
+
+    @Scheduled(cron = "0 0 */2 * * ?")
+    @Transactional
+    public void cleanupOldConfirmedPayments() {
+        LocalDateTime thresholdTime = LocalDateTime.now().minusHours(120);
+
+        List<Payment> oldConfirmedPayments = paymentRepository.findAllByStatusAndUpdatedAtBefore(
+                PaymentStatus.CONFIRMED, thresholdTime
+        );
+
+        if (!oldConfirmedPayments.isEmpty()) {
+            paymentRepository.deleteAll(oldConfirmedPayments);
+        }
+    }
 }
