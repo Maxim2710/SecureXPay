@@ -23,9 +23,9 @@ spring:
       password: 181056ad-19df-4265-8169-7e851246fd59
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/postgres
-    username: postgres
-    password: 12345
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:5432/securexpay_account
+    username: securexpay_account_admin
+    password: HeQUUcu\AMIjlJ1N
 
   jpa:
     open-in-view: false
