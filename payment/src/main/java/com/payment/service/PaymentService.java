@@ -1,9 +1,9 @@
 package com.payment.service;
 
 import com.payment.connector.AuthConnector;
-import com.payment.dto.PaymentConfirmationResponse;
+import com.payment.dto.confirmation.PaymentConfirmationResponse;
 import com.payment.dto.PaymentDTO;
-import com.payment.dto.PaymentHistoryDTO;
+import com.payment.dto.history.PaymentHistoryDTO;
 import com.payment.model.payment.Payment;
 import com.payment.model.status.PaymentStatus;
 import com.payment.model.user.User;
