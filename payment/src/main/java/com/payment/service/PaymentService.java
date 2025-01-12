@@ -1,9 +1,9 @@
 package com.payment.service;
 
 import com.payment.connector.AuthConnector;
-import com.payment.dto.PaymentConfirmationResponse;
+import com.payment.dto.confirmation.PaymentConfirmationResponse;
 import com.payment.dto.PaymentDTO;
-import com.payment.dto.PaymentHistoryDTO;
+import com.payment.dto.history.PaymentHistoryDTO;
 import com.payment.model.payment.Payment;
 import com.payment.model.status.PaymentStatus;
 import com.payment.model.user.User;
@@ -45,7 +45,10 @@ public class PaymentService {
 
         emailService.sendOtpEmail(payment.getId(), user.getEmail(), otp, amount);
 
-        return new PaymentDTO(payment.getId(), payment.getStatus());
+        return new PaymentDTO(
+                payment.getId(),
+                payment.getStatus()
+        );
     }
 
     public PaymentConfirmationResponse confirmPayment(Long paymentId, String otp) {
@@ -80,7 +83,10 @@ public class PaymentService {
 
         emailService.sendPaymentConfirmationEmail(payment.getId(), userEmail, payment.getAmount());
 
-        return new PaymentConfirmationResponse(payment.getId(), payment.getStatus(), "Платеж успешно подтвержден");
+        return new PaymentConfirmationResponse(payment.getId(),
+                payment.getStatus(),
+                "Платеж успешно подтвержден"
+        );
     }
 
     @Transactional
@@ -158,6 +164,27 @@ public class PaymentService {
                         payment.getUpdatedAt()
                 ))
                 .collect(Collectors.toList());
+    }
+
+    public PaymentDTO getPaymentStatus(String token, Long paymentId) {
+        User user = authConnector.getCurrentUser(token);
+
+        Optional<Payment> optionalPayment = paymentRepository.findById(paymentId);
+
+        if (optionalPayment.isEmpty()) {
+            throw new IllegalArgumentException("Платеж не найден");
+        }
+
+        Payment payment = optionalPayment.get();
+
+        if (!payment.getUser().getId().equals(user.getId())) {
+            throw new IllegalArgumentException("Вы не можете просматривать статус чужого платежа");
+        }
+
+        return new PaymentDTO(
+                payment.getId(),
+                payment.getStatus()
+        );
     }
 
     private String generateOtp() {

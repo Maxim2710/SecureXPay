@@ -2,6 +2,13 @@ package com.payment.controller;
 
 import com.payment.bom.error.ErrorResponse;
 import com.payment.dto.*;
+import com.payment.dto.cancellation.PaymentCanceledResponse;
+import com.payment.dto.confirmation.PaymentConfirmationRequest;
+import com.payment.dto.confirmation.PaymentConfirmationResponse;
+import com.payment.dto.creature.PaymentRequest;
+import com.payment.dto.creature.PaymentResponse;
+import com.payment.dto.history.PaymentHistoryDTO;
+import com.payment.dto.refusal.PaymentRefundResponse;
 import com.payment.model.status.PaymentStatus;
 import com.payment.service.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +31,8 @@ public class PaymentController {
         try {
             PaymentDTO payment = paymentService.createPayment(token, paymentRequest.getAmount());
             return ResponseEntity.ok(new PaymentResponse(payment.getId(), payment.getStatus()));
-        } catch (Exception ex) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(ex.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }
     }
 
@@ -74,5 +81,19 @@ public class PaymentController {
     public ResponseEntity<List<PaymentHistoryDTO>> getPaymentHistory(@RequestHeader(name = "Authorization") String token) {
         List<PaymentHistoryDTO> history = paymentService.getPaymentHistory(token);
         return ResponseEntity.ok(history);
+    }
+
+    @GetMapping("/status/{paymentId}")
+    public ResponseEntity<Object> getPaymentStatus(@RequestHeader(name = "Authorization") String token,
+                                                   @PathVariable Long paymentId) {
+        try {
+            PaymentDTO statusDTO = paymentService.getPaymentStatus(token, paymentId);
+            return ResponseEntity.ok(statusDTO);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ErrorResponse("Произошла ошибка при получении статуса платежа"));
+        }
     }
 }

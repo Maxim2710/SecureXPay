@@ -1,4 +1,4 @@
-package com.payment.dto;
+package com.payment.dto.cancellation;
 
 import com.payment.model.status.PaymentStatus;
 import lombok.AllArgsConstructor;

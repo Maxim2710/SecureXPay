@@ -1,4 +1,4 @@
-package com.payment.dto;
+package com.payment.dto.confirmation;
 
 import com.payment.model.status.PaymentStatus;
 import lombok.AllArgsConstructor;
