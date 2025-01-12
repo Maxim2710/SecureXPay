@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping(path = "/payments")
 public class PaymentController {
@@ -66,5 +68,11 @@ public class PaymentController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ErrorResponse("Произошла непредвиденная ошибка"));
         }
+    }
+
+    @GetMapping("/history")
+    public ResponseEntity<List<PaymentHistoryDTO>> getPaymentHistory(@RequestHeader(name = "Authorization") String token) {
+        List<PaymentHistoryDTO> history = paymentService.getPaymentHistory(token);
+        return ResponseEntity.ok(history);
     }
 }
