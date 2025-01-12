@@ -7,9 +7,9 @@ spring:
     name: paymentSecureXPay
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/postgres
-    username: postgres
-    password: 12345
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:5432/securexpay_account
+    username: securexpay_account_admin
+    password: HeQUUcu\AMIjlJ1N
 
   jpa:
     open-in-view: false

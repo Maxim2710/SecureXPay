@@ -1,0 +1,61 @@
+services:
+  account_postgres:
+    container_name: securexpay_db
+    image: postgres
+    environment:
+      POSTGRES_DB: securexpay_account
+      POSTGRES_USER: securexpay_account_admin
+      POSTGRES_PASSWORD: HeQUUcu\AMIjlJ1N
+    volumes:
+      - securexpay_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U securexpay_account_admin -d securexpay_account" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - securexpay_net
+    ports:
+      - "54323:5432"
+    restart: unless-stopped
+
+  auth:
+    container_name: securexpay_auth
+    image: securexpay_auth:test
+    build: ./auth
+    environment:
+      POSTGRES_HOST: account_postgres
+
+    depends_on:
+      account_postgres:
+        condition: service_healthy
+    networks:
+      - securexpay_net
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+  payment:
+    container_name: securexpay_payment
+    image: securexpay_payment:test
+    build: ./payment
+    environment:
+      POSTGRES_HOST: account_postgres
+
+    depends_on:
+      account_postgres:
+        condition: service_healthy
+      auth:
+        condition: service_started
+    networks:
+      - securexpay_net
+    ports:
+      - "8081:8081"
+    restart: unless-stopped
+
+volumes:
+  securexpay_data:
+
+networks:
+  securexpay_net:
+    driver: bridge
