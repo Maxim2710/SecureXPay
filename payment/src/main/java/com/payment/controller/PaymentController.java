@@ -31,8 +31,8 @@ public class PaymentController {
         try {
             PaymentDTO payment = paymentService.createPayment(token, paymentRequest.getAmount());
             return ResponseEntity.ok(new PaymentResponse(payment.getId(), payment.getStatus()));
-        } catch (Exception ex) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(ex.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }
     }
 
@@ -81,5 +81,19 @@ public class PaymentController {
     public ResponseEntity<List<PaymentHistoryDTO>> getPaymentHistory(@RequestHeader(name = "Authorization") String token) {
         List<PaymentHistoryDTO> history = paymentService.getPaymentHistory(token);
         return ResponseEntity.ok(history);
+    }
+
+    @GetMapping("/status/{paymentId}")
+    public ResponseEntity<Object> getPaymentStatus(@RequestHeader(name = "Authorization") String token,
+                                                   @PathVariable Long paymentId) {
+        try {
+            PaymentDTO statusDTO = paymentService.getPaymentStatus(token, paymentId);
+            return ResponseEntity.ok(statusDTO);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ErrorResponse("Произошла ошибка при получении статуса платежа"));
+        }
     }
 }
