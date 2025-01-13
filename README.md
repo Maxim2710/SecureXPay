@@ -102,7 +102,7 @@ CREATE DATABASE auth_service_db;
 CREATE DATABASE payment_service_db;
 ```
 
-Обновите файлы `application.properties` в каждом сервисе, указав свои учетные данные для базы данных.
+Обновите файлы `application.yml` в каждом сервисе, указав свои учетные данные для базы данных.
 
 ### **Шаг 3: Сборка и запуск**
 
